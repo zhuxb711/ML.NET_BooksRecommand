@@ -1,5 +1,6 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
 using System;
 using System.IO;
 using System.Linq;
@@ -62,16 +63,38 @@ namespace ML
                 EvaluateModel(TestDataView, BestModel);
 
                 Console.WriteLine("=============== 请输入UserID和ISBN以预测Rating ===============");
+
+                FLAG1:
                 Console.WriteLine("UserID:");
                 string UserID = Console.ReadLine();
+                if(string.IsNullOrWhiteSpace(UserID))
+                {
+                    Console.WriteLine("此项必填，不可为空");
+                    Console.WriteLine();
+                    goto FLAG1;
+                }
                 Console.WriteLine();
 
+                FLAG2:
                 Console.WriteLine("Age:");
                 string Age = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(Age))
+                {
+                    Console.WriteLine("此项必填，不可为空");
+                    Console.WriteLine();
+                    goto FLAG2;
+                }
                 Console.WriteLine();
 
+                FLAG3:
                 Console.WriteLine("ISBN:");
                 string ISBN = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(Age))
+                {
+                    Console.WriteLine("此项必填，不可为空");
+                    Console.WriteLine();
+                    goto FLAG3;
+                }
                 Console.WriteLine();
 
                 using (PredictionEngine<BookRating, BookRatingPrediction> Engine = MLCProvider.Current.Model.CreatePredictionEngine<BookRating, BookRatingPrediction>(BestModel))
@@ -110,7 +133,16 @@ namespace ML
 
                 Console.WriteLine("=============== 正在使用交叉验证训练预测模型 ===============");
 
-                var TrainingPipeLine = DataPipeLine.Append(MLC.BinaryClassification.Trainers.FieldAwareFactorizationMachine(new string[] { "Features" }));
+
+                FieldAwareFactorizationMachineTrainer.Options Options = new FieldAwareFactorizationMachineTrainer.Options
+                {
+                    Verbose = true,
+                    NumberOfIterations = 10,
+                    FeatureColumnName = "Features",
+                    Shuffle = true
+                };
+
+                EstimatorChain<FieldAwareFactorizationMachinePredictionTransformer> TrainingPipeLine = DataPipeLine.Append(MLC.BinaryClassification.Trainers.FieldAwareFactorizationMachine(Options));
 
                 var CVResult = MLC.BinaryClassification.CrossValidate(TrainingDataView, TrainingPipeLine);
 
@@ -129,8 +161,6 @@ namespace ML
 
             Console.WriteLine();
             Console.WriteLine("准确度: " + Metrics.Accuracy);
-            Console.WriteLine("AUC: " + Metrics.AreaUnderRocCurve);
-            Console.WriteLine("对数损失: " + Metrics.LogLoss);
             Console.WriteLine();
         }
 

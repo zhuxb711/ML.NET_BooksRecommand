@@ -14,7 +14,7 @@ namespace ML
         public string ISBN;
         [LoadColumn(2)]
         public bool Label;
-        [LoadColumn(7)]
+        [LoadColumn(8)]
         public string Age;
     }
 
