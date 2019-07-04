@@ -160,7 +160,7 @@ namespace ML
             Console.WriteLine("=============== 评估结果如下 ===============");
 
             Console.WriteLine();
-            Console.WriteLine("准确度: " + Metrics.Accuracy);
+            Console.WriteLine("准确度: " + Metrics.Accuracy.ToString("0.##"));
             Console.WriteLine();
         }
 
